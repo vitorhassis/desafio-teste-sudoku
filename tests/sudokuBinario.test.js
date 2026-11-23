@@ -1,4 +1,5 @@
 const { SudokuBinario, TAMANHO } = require('../src/sudokuBinario');
+const { explorarSolucoes } = require('../src/solucionador');
 
 const SOLUCAO = ['010110', '011001', '100101', '101010', '010011', '101100'];
 const QUASE_PRONTO = [...SOLUCAO.slice(0, 5), '......'];
@@ -238,5 +239,45 @@ describe('Busca de soluções', () => {
     expect(new SudokuBinario(SOLUCAO).contarSolucoes()).toBe(1);
     expect(SudokuBinario.vazio().contarSolucoes()).toBe(2);
     expect(SudokuBinario.vazio().solucaoUnica()).toBe(false);
+  });
+
+  test('contarSolucoes(5) para a busca ao encontrar a quinta solução', () => {
+    const vazio = SudokuBinario.vazio();
+    expect(vazio.contarSolucoes(5)).toBe(5);
+    expect(vazio.contarSolucoes(6)).toBe(6); // existem mais de cinco: o limite é que encerra a busca
+
+    // O solucionador entrega exatamente cinco soluções, todas válidas e diferentes entre si.
+    const encontradas = [];
+    const total = explorarSolucoes(vazio.paraTexto(), 5, (textos) => encontradas.push(textos));
+    expect(total).toBe(5);
+    expect(encontradas).toHaveLength(5);
+    expect(new Set(encontradas.map((textos) => textos.join('|'))).size).toBe(5);
+    encontradas.forEach((textos) => expect(new SudokuBinario(textos).resolvido()).toBe(true));
+  });
+
+  test('resolver() conserva todas as pistas fixas do tabuleiro original', () => {
+    const tabuleiros = [
+      ['010...', '.1.0.1', '1..1..', '.0.0.0', '0.001.', '1.1..0'].map((linha, i) => (
+        [...linha].map((c, j) => (c === '.' ? '.' : SOLUCAO[i][j])).join('')
+      )),
+      ['0.....', '.1....', '......', '......', '......', '.....0'],
+      QUASE_PRONTO,
+    ];
+
+    tabuleiros.forEach((entrada) => {
+      const original = new SudokuBinario(entrada);
+      const resultado = original.resolver();
+
+      expect(resultado).not.toBeNull();
+      expect(resultado.resolvido()).toBe(true);
+      for (let linha = 0; linha < TAMANHO; linha++) {
+        for (let coluna = 0; coluna < TAMANHO; coluna++) {
+          if (original.ehFixa(linha, coluna)) {
+            expect(resultado.valor(linha, coluna)).toBe(original.valor(linha, coluna));
+          }
+        }
+      }
+      expect(original.paraTexto()).toEqual(entrada); // o original não é alterado
+    });
   });
 });
