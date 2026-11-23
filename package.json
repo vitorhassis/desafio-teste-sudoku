@@ -1,0 +1,25 @@
+{
+  "name": "desafio-teste-sudoku",
+  "version": "1.0.0",
+  "description": "Validação e resolução de Sudoku binário 6 x 6 com testes automatizados",
+  "main": "src/sudokuBinario.js",
+  "scripts": {
+    "test": "jest --coverage --runInBand"
+  },
+  "license": "MIT",
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": ["src/**/*.js"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
