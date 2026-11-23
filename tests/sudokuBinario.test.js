@@ -194,3 +194,49 @@ describe('Conclusão do desafio', () => {
     expect(jogo.resolvido()).toBe(true);
   });
 });
+
+describe('Busca de soluções', () => {
+  test('completa a linha ausente sem modificar o tabuleiro original', () => {
+    const jogo = new SudokuBinario(QUASE_PRONTO);
+    const resultado = jogo.resolver();
+    expect(resultado).not.toBe(jogo);
+    expect(resultado.paraTexto()).toEqual(SOLUCAO);
+    expect(resultado.resolvido()).toBe(true);
+    expect(jogo.paraTexto()).toEqual(QUASE_PRONTO);
+  });
+
+  test('um tabuleiro pronto produz uma nova instância equivalente', () => {
+    const jogo = new SudokuBinario(SOLUCAO);
+    const resultado = jogo.resolver();
+    expect(resultado).not.toBe(jogo);
+    expect(resultado.paraTexto()).toEqual(SOLUCAO);
+  });
+
+  test('também encontra uma solução partindo da grade vazia', () => {
+    const resultado = SudokuBinario.vazio().resolver();
+    expect(resultado.resolvido()).toBe(true);
+    expect(resultado.paraTexto().every((linha) => !linha.includes('.'))).toBe(true);
+  });
+
+  test('interrompe imediatamente se as pistas já estão em conflito', () => {
+    const impossivel = new SudokuBinario(['000...', ...Array(5).fill('......')]);
+    expect(impossivel.resolver()).toBeNull();
+    expect(impossivel.contarSolucoes()).toBe(0);
+  });
+
+  test('retorna null quando a contradição só aparece durante a busca', () => {
+    const impossivel = new SudokuBinario(['001101', '00110.', ...Array(4).fill('......')]);
+    expect(impossivel.conflitos()).toEqual([]);
+    expect(impossivel.resolver()).toBeNull();
+    expect(impossivel.contarSolucoes()).toBe(0);
+  });
+
+  test('conta soluções até o limite e identifica unicidade', () => {
+    const unica = new SudokuBinario(QUASE_PRONTO);
+    expect(unica.contarSolucoes()).toBe(1);
+    expect(unica.solucaoUnica()).toBe(true);
+    expect(new SudokuBinario(SOLUCAO).contarSolucoes()).toBe(1);
+    expect(SudokuBinario.vazio().contarSolucoes()).toBe(2);
+    expect(SudokuBinario.vazio().solucaoUnica()).toBe(false);
+  });
+});
