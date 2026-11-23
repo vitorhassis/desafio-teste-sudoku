@@ -1,6 +1,7 @@
 'use strict';
 
 const { listarConflitos } = require('./regras');
+const { explorarSolucoes } = require('./solucionador');
 
 const TAMANHO = 6;
 const LINHA_VAZIA = '.'.repeat(TAMANHO);
@@ -66,6 +67,22 @@ class SudokuBinario {
 
   resolvido() {
     return this.completo() && this.conflitos().length === 0;
+  }
+
+  resolver() {
+    let resposta = null;
+    explorarSolucoes(this.paraTexto(), 1, (textos) => {
+      resposta = textos;
+    });
+    return resposta === null ? null : new SudokuBinario(resposta);
+  }
+
+  contarSolucoes(limite = 2) {
+    return explorarSolucoes(this.paraTexto(), limite, () => {});
+  }
+
+  solucaoUnica() {
+    return this.contarSolucoes(2) === 1;
   }
 
   _verificarPosicao(linha, coluna) {
