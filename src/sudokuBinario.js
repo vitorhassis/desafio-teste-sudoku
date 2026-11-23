@@ -1,5 +1,7 @@
 'use strict';
 
+const { listarConflitos } = require('./regras');
+
 const TAMANHO = 6;
 const LINHA_VAZIA = '.'.repeat(TAMANHO);
 
@@ -56,6 +58,14 @@ class SudokuBinario {
 
   completo() {
     return this._celulas.every((linha) => linha.every((valor) => valor !== null));
+  }
+
+  conflitos() {
+    return listarConflitos(this._celulas);
+  }
+
+  resolvido() {
+    return this.completo() && this.conflitos().length === 0;
   }
 
   _verificarPosicao(linha, coluna) {
